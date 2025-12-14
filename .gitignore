@@ -1,0 +1,32 @@
+# Root env (agar kabhi ho)
+.env
+
+# Server env (IMPORTANT)
+server/.env
+
+# Dependencies
+node_modules/
+server/node_modules/
+client/node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Build folders
+dist/
+build/
+client/dist/
+client/build/
+
+# Vite
+client/.vite/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
