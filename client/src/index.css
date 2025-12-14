@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+/* optional global tweaks */
+body {
+  @apply bg-gray-50;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.input {
+  @apply w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500;
+}
