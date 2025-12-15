@@ -19,7 +19,7 @@ const Profile = () => {
       if (avatar) formData.append("avatar", avatar);
 
       const res = await axios.put(
-        "https://productr-bez3.onrender.com//api/auth/update-profile",
+        "https://productr-hfck.onrender.com/api/auth/update-profile",
         formData,
         {
           headers: {
