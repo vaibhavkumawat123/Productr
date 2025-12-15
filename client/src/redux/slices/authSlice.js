@@ -36,11 +36,20 @@ export const sendSignupOtp = createAsyncThunk(
   "auth/sendSignupOtp",
   async ({ email }, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${API}/signup/send-otp`, { email });
+      const res = await axios.post(
+        "https://productr-3pqm.onrender.com/api/auth/signup/send-otp",
+        { email },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       return res.data;
     } catch (err) {
+      console.log("BACKEND ERROR 👉", err.response?.data);
       return rejectWithValue(
-        err.response?.data?.message || "Server error. Try again."
+        err.response?.data?.message || "Signup OTP failed"
       );
     }
   }
@@ -57,7 +66,7 @@ export const verifySignupOtp = createAsyncThunk(
         password,
         otp,
       });
-      return res.data; 
+      return res.data;
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || "Invalid or expired OTP"

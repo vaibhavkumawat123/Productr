@@ -1,4 +1,4 @@
-import "dotenv/config";  
+import "dotenv/config";
 
 import express from "express";
 import mongoose from "mongoose";
@@ -9,14 +9,16 @@ import productRoutes from "./routes/productRoutes.js";
 
 const app = express();
 
-/* MIDDLEWARES */
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+/* 🔥 CORS */
 app.use(
   cors({
     origin: ["http://localhost:5173", "https://productr-rho.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
 
