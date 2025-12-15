@@ -8,7 +8,8 @@ import jwt from "jsonwebtoken";
 export const sendSignupOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
-
+    console.log("🔥 SIGNUP SEND OTP API HIT");
+    console.log("REQ BODY:", req.body);
     console.log("SIGNUP OTP REQUEST FOR:", email);
 
     if (!email) throw new CustomError(400, "Email is required");
