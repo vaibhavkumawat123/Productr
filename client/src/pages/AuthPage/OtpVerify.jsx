@@ -5,7 +5,7 @@ import { useState, useRef } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
 import Spinner from "../../components/ui/Spinner";
-import { h2 } from "motion/react-client";
+import { motion } from "framer-motion";
 
 const OtpVerify = ({ email, mode, signupData }) => {
   const [otp, setOtp] = useState(Array(6).fill(""));
@@ -65,7 +65,14 @@ const OtpVerify = ({ email, mode, signupData }) => {
   return (
     <form onSubmit={submit} className="w-[350px] text-center">
       {/* OTP BOXES */}
-      <h2 className="text-lg font-medium mb-4">Please verify your otp</h2>
+      <motion.h2
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-lg font-medium mb-4"
+      >
+        Please verify your otp
+      </motion.h2>
+
       <div className="flex justify-between mb-4">
         {otp.map((digit, index) => (
           <input
