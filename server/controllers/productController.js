@@ -120,7 +120,6 @@ export const updateProduct = async (req, res) => {
       req.body.price !== undefined ? Number(req.body.price) : product.price;
     product.brand = req.body.brand ?? product.brand;
 
-    // ✅ FIXED BOOLEAN
     if (req.body.exchange !== undefined) {
       product.exchange = toBoolean(req.body.exchange);
     }
