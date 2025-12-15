@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { House, Package } from "lucide-react";
+import logo from "../../assets/logo.png"
 
 const Sidebar = () => {
   const navClass = ({ isActive }) =>
@@ -15,7 +16,7 @@ const Sidebar = () => {
       {/* LOGO */}
       <div className="flex items-center justify-center mb-6">
         <img
-          src="/src/assets/logo.png"
+          src={logo}
           alt="logo"
           className="w-41 h-auto object-contain"
         />
