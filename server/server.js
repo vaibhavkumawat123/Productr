@@ -20,6 +20,8 @@ app.use(
   })
 );
 
+app.options("*", cors()); 
+
 /* STATIC */
 app.use("/uploads", express.static("uploads"));
 
@@ -35,6 +37,7 @@ mongoose
 
 /* GLOBAL ERROR HANDLER */
 app.use((err, req, res, next) => {
+  console.error("GLOBAL ERROR:", err);
   res.status(err.statusCode || 500).json({
     success: false,
     message: err.message || "Server Error",
