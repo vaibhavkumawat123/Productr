@@ -8,15 +8,18 @@ import jwt from "jsonwebtoken";
 export const sendSignupOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
+
     console.log("🔥 SIGNUP SEND OTP API HIT");
     console.log("REQ BODY:", req.body);
-    console.log("SIGNUP OTP REQUEST FOR:", email);
 
-    if (!email) throw new CustomError(400, "Email is required");
+    if (!email) {
+      throw new CustomError(400, "Email is required");
+    }
 
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw new CustomError(400, "Email already registered");
+
+    if (existingUser && existingUser.isVerified === true) {
+      throw new CustomError(400, "Email already registered. Please login.");
     }
 
     await Otp.deleteMany({ email });
@@ -35,17 +38,18 @@ export const sendSignupOTP = async (req, res, next) => {
       `Your signup OTP is ${otp}. It will expire in 5 minutes.`
     );
 
-    console.log("SIGNUP OTP SENT:", otp);
+    console.log("✅ SIGNUP OTP SENT:", otp);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Signup OTP sent to email",
     });
   } catch (error) {
-    console.error("SEND SIGNUP OTP ERROR:", error);
+    console.error("❌ SEND SIGNUP OTP ERROR:", error);
     next(error);
   }
 };
+
 
 /*  VERIFY OTP & SIGNUP  */
 export const verifySignupOTP = async (req, res, next) => {
