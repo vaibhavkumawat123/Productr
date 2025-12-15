@@ -57,7 +57,7 @@ export const verifySignupOtp = createAsyncThunk(
         password,
         otp,
       });
-      return res.data; // 👈 token + user
+      return res.data; 
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || "Invalid or expired OTP"

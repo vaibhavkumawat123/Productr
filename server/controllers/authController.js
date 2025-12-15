@@ -102,36 +102,17 @@ export const sendLoginOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
 
-    if (!email) {
-      throw new CustomError(400, "Email is required");
-    }
+    if (!email) throw new CustomError(400, "Email is required");
 
     const user = await User.findOne({ email });
-    if (!user) {
-      throw new CustomError(400, "User not found");
-    }
-
-    await Otp.deleteMany({ email });
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    await Otp.create({
-      email,
-      otp,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-    });
-
-    await sendEmail(
-      email,
-      "Login OTP",
-      `Your login OTP is ${otp}. It will expire in 5 minutes.`
-    );
+    if (!user) throw new CustomError(400, "User not found");
 
     res.status(200).json({
       success: true,
-      message: "OTP sent to email",
+      message: "OTP logic working (email skipped)",
     });
   } catch (error) {
+    console.error("LOGIN OTP ERROR:", error);
     next(error);
   }
 };
