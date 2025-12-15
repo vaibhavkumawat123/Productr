@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API = "https://productr-hfck.onrender.com/api/products";
+const API = "https://productr-3pqm.onrender.com/api/products";
 
 /*
    FETCH PRODUCTS (USER WISE)
