@@ -5,39 +5,44 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 
-dotenv.config({ path: "./.env" });
+dotenv.config();
 
 const app = express();
 
-/*  CORS MIDDLEWARE  */
+/* MIDDLEWARES */
+app.use(express.json());
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://YOUR_FRONTEND.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
 
+/* STATIC */
 app.use("/uploads", express.static("uploads"));
+
+/* ROUTES */
+app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 
-app.use(express.json());
-
+/* DB */
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
-  .catch(console.error);
+  .catch((err) => console.error("❌ MongoDB error:", err));
 
-app.use("/api/auth", authRoutes);
-
-/*  GLOBAL ERROR HANDLER  */
+/* GLOBAL ERROR HANDLER */
 app.use((err, req, res, next) => {
   res.status(err.statusCode || 500).json({
     success: false,
-    message: err.message,
+    message: err.message || "Server Error",
   });
 });
 
-app.listen(5000, () => {
-  console.log("🚀 Server running on http://localhost:5000");
+/* SERVER */
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
