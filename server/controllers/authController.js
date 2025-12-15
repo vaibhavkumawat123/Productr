@@ -99,19 +99,30 @@ export const verifySignupOTP = async (req, res, next) => {
 /*  SEND OTP FOR LOGIN  */
 export const sendLoginOTP = async (req, res, next) => {
   try {
-    console.log("LOGIN SEND OTP HIT");
-
     const { email } = req.body;
-    console.log("EMAIL:", email);
 
+    if (!email) throw new CustomError(400, "Email is required");
+
+    const user = await User.findOne({ email });
+    if (!user) throw new CustomError(400, "User not found");
+
+    await Otp.deleteMany({ email });
+
+    const otp = "123456";
+    await Otp.create({
+      email,
+      otp,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    });
+
+    console.log("LOGIN OTP:", otp);
 
     res.status(200).json({
       success: true,
-      message: "OTP API working (email skipped)",
+      message: "OTP generated (email bypassed)",
     });
-  } catch (error) {
-    console.error(error);
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
