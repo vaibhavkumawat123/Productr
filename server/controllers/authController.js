@@ -8,6 +8,9 @@ import jwt from "jsonwebtoken";
 export const sendSignupOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
+
+    console.log("SIGNUP OTP REQUEST FOR:", email);
+
     if (!email) throw new CustomError(400, "Email is required");
 
     const existingUser = await User.findOne({ email });
@@ -28,15 +31,18 @@ export const sendSignupOTP = async (req, res, next) => {
     await sendEmail(
       email,
       "Productr Signup OTP",
-      `Your OTP is ${otp}. It will expire in 5 minutes.`
+      `Your signup OTP is ${otp}. It will expire in 5 minutes.`
     );
+
+    console.log("SIGNUP OTP SENT:", otp);
 
     res.status(200).json({
       success: true,
-      message: "OTP sent to email",
+      message: "Signup OTP sent to email",
     });
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    console.error("SEND SIGNUP OTP ERROR:", error);
+    next(error);
   }
 };
 
