@@ -8,7 +8,6 @@ import jwt from "jsonwebtoken";
 export const sendSignupOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
-
     if (!email) throw new CustomError(400, "Email is required");
 
     const existingUser = await User.findOne({ email });
@@ -26,22 +25,18 @@ export const sendSignupOTP = async (req, res, next) => {
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     });
 
-    try {
-      await sendEmail(
-        email,
-        "Your Signup OTP",
-        `Your OTP is ${otp}. It will expire in 5 minutes.`
-      );
-    } catch (mailErr) {
-      console.error("❌ Email failed:", mailErr.message);
-    }
+    await sendEmail(
+      email,
+      "Productr Signup OTP",
+      `Your OTP is ${otp}. It will expire in 5 minutes.`
+    );
 
     res.status(200).json({
       success: true,
       message: "OTP sent to email",
     });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -100,7 +95,6 @@ export const verifySignupOTP = async (req, res, next) => {
 export const sendLoginOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
-
     if (!email) throw new CustomError(400, "Email is required");
 
     const user = await User.findOne({ email });
@@ -108,18 +102,23 @@ export const sendLoginOTP = async (req, res, next) => {
 
     await Otp.deleteMany({ email });
 
-    const otp = "123456";
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
     await Otp.create({
       email,
       otp,
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     });
 
-    console.log("LOGIN OTP:", otp);
+    await sendEmail(
+      email,
+      "Productr Login OTP",
+      `Your login OTP is ${otp}. It will expire in 5 minutes.`
+    );
 
     res.status(200).json({
       success: true,
-      message: "OTP generated (email bypassed)",
+      message: "OTP sent to email",
     });
   } catch (err) {
     next(err);
