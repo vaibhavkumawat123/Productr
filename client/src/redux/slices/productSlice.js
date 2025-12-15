@@ -70,7 +70,7 @@ export const togglePublishProduct = createAsyncThunk(
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      return res.data; // updated product
+      return res.data; 
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }

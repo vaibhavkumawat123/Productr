@@ -54,7 +54,8 @@ export const verifySignupOTP = async (req, res, next) => {
       throw new CustomError(400, "All fields are required");
     }
 
-    const otpData = await Otp.findOne({ email });
+    const otpData = await Otp.findOne({ email }).sort({ createdAt: -1 });
+
     if (!otpData) throw new CustomError(400, "OTP not found");
 
     if (Date.now() > otpData.expiresAt.getTime()) {
@@ -198,7 +199,7 @@ export const updateProfile = async (req, res) => {
       id: user._id,
       userName: user.userName,
       email: user.email,
-      avatar: user.avatar, 
+      avatar: user.avatar,
     },
   });
 };
