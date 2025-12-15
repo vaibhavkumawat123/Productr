@@ -22,9 +22,11 @@ export const verifyLoginOtp = createAsyncThunk(
   async ({ email, otp }, { rejectWithValue }) => {
     try {
       const res = await axios.post(`${API}/login/verify-otp`, { email, otp });
-      return res.data; // 👈 token + user
+      return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message);
+      return rejectWithValue(
+        err.response?.data?.message || "Invalid or expired OTP"
+      );
     }
   }
 );
@@ -37,7 +39,9 @@ export const sendSignupOtp = createAsyncThunk(
       const res = await axios.post(`${API}/signup/send-otp`, { email });
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message);
+      return rejectWithValue(
+        err.response?.data?.message || "Server error. Try again."
+      );
     }
   }
 );
@@ -55,7 +59,9 @@ export const verifySignupOtp = createAsyncThunk(
       });
       return res.data; // 👈 token + user
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message);
+      return rejectWithValue(
+        err.response?.data?.message || "Invalid or expired OTP"
+      );
     }
   }
 );

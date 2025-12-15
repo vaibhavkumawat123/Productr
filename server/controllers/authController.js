@@ -92,6 +92,7 @@ export const verifySignupOTP = async (req, res, next) => {
       },
     });
   } catch (error) {
+    console.error("LOGIN OTP ERROR:", error);
     next(error);
   }
 };
