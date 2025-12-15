@@ -9,10 +9,11 @@ import productRoutes from "./routes/productRoutes.js";
 
 const app = express();
 
+/* BODY PARSERS */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* 🔥 CORS */
+/* CORS */
 app.use(
   cors({
     origin: ["http://localhost:5173", "https://productr-rho.vercel.app"],
@@ -25,6 +26,16 @@ app.use(
 /* ROUTES */
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
+
+/* 🔥 GLOBAL ERROR HANDLER  */
+app.use((err, req, res, next) => {
+  console.error("🔥 GLOBAL ERROR:", err);
+
+  res.status(err.statusCode || 500).json({
+    success: false,
+    message: err.message || "Server Error",
+  });
+});
 
 /* DB */
 mongoose
