@@ -15,7 +15,6 @@ const Products = () => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
-  // 🔹 Show empty only when no products
   if (!loading && products.length === 0) {
     return (
       <div className="px-10 py-6 flex justify-center items-center min-h-[60vh]">

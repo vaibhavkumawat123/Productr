@@ -2,12 +2,18 @@ import cloudinary from "../config/cloudinary.js";
 import Product from "../models/productModel.js";
 
 /* 
+   HELPER
+ */
+const toBoolean = (val) => val === true || val === "true";
+
+/* 
    CREATE PRODUCT
  */
 export const createProduct = async (req, res) => {
   try {
     const uploadedImages = [];
 
+    // 🔹 Upload images
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const result = await cloudinary.uploader.upload(
@@ -22,15 +28,20 @@ export const createProduct = async (req, res) => {
       }
     }
 
+    // 🔹 Create product
     const product = await Product.create({
       user: req.user.id,
       name: req.body.name,
       productType: req.body.productType,
-      quantity: req.body.quantity,
-      mrp: req.body.mrp,
-      price: req.body.price,
+      quantity: Number(req.body.quantity),
+      mrp: Number(req.body.mrp),
+      price: Number(req.body.price),
       brand: req.body.brand,
-      exchange: req.body.exchange === "yes",
+
+      // ✅ FIXED BOOLEAN
+      exchange: toBoolean(req.body.exchange),
+      isPublished: toBoolean(req.body.isPublished),
+
       images: uploadedImages,
     });
 
@@ -70,7 +81,7 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    /* EXISTING IMAGES */
+    /* ---------- EXISTING IMAGES ---------- */
     let images = product.images;
 
     if (req.body.existingImages) {
@@ -81,7 +92,7 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    /* NEW IMAGES */
+    /* ---------- NEW IMAGES ---------- */
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const result = await cloudinary.uploader.upload(
@@ -96,15 +107,27 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    /* UPDATE FIELDS */
+    /* ---------- UPDATE FIELDS ---------- */
     product.name = req.body.name ?? product.name;
     product.productType = req.body.productType ?? product.productType;
-    product.quantity = req.body.quantity ?? product.quantity;
-    product.mrp = req.body.mrp ?? product.mrp;
-    product.price = req.body.price ?? product.price;
+    product.quantity =
+      req.body.quantity !== undefined
+        ? Number(req.body.quantity)
+        : product.quantity;
+    product.mrp =
+      req.body.mrp !== undefined ? Number(req.body.mrp) : product.mrp;
+    product.price =
+      req.body.price !== undefined ? Number(req.body.price) : product.price;
     product.brand = req.body.brand ?? product.brand;
-    product.exchange =
-      req.body.exchange === "yes" || req.body.exchange === true;
+
+    // ✅ FIXED BOOLEAN
+    if (req.body.exchange !== undefined) {
+      product.exchange = toBoolean(req.body.exchange);
+    }
+
+    if (req.body.isPublished !== undefined) {
+      product.isPublished = toBoolean(req.body.isPublished);
+    }
 
     product.images = images;
 
@@ -130,7 +153,7 @@ export const deleteProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    /* DELETE CLOUDINARY IMAGES */
+    // 🔹 Delete Cloudinary images
     for (const img of product.images) {
       if (img.public_id) {
         await cloudinary.uploader.destroy(img.public_id);

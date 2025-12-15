@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { addProduct, updateProduct } from "../../redux/slices/productSlice";
 
@@ -7,42 +7,31 @@ const AddProductModal = ({ onClose, editProduct = null }) => {
   const dispatch = useDispatch();
   const isEdit = Boolean(editProduct);
 
-  const [form, setForm] = useState(
-    isEdit
-      ? {
-          name: editProduct.name,
-          productType: editProduct.productType,
-          quantity: editProduct.quantity,
-          mrp: editProduct.mrp,
-          price: editProduct.price,
-          brand: editProduct.brand,
-          exchange: editProduct.exchange ? "yes" : "no",
+  const [loading, setLoading] = useState(false);
 
-          existingImages: editProduct.images || [], 
-          images: [], // new images
-        }
-      : {
-          name: "",
-          productType: "",
-          quantity: "",
-          mrp: "",
-          price: "",
-          brand: "",
-          exchange: "yes",
-          existingImages: [],
-          images: [],
-        }
-  );
+  const [form, setForm] = useState({
+    name: editProduct?.name || "",
+    productType: editProduct?.productType || "",
+    quantity: editProduct?.quantity || "",
+    mrp: editProduct?.mrp || "",
+    price: editProduct?.price || "",
+    brand: editProduct?.brand || "",
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+    exchange: editProduct?.exchange ? "yes" : "no",
+    isPublished: editProduct?.isPublished ?? true,
+
+    existingImages: editProduct?.images || [],
+    images: [],
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setForm((prev) => ({
-      ...prev,
-      images: [...prev.images, ...files],
-    }));
+    setForm((prev) => ({ ...prev, images: [...prev.images, ...files] }));
   };
 
   const removeExistingImage = (index) => {
@@ -61,19 +50,33 @@ const AddProductModal = ({ onClose, editProduct = null }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
+    setLoading(true);
+
+    const payload = {
+      ...form,
+      quantity: Number(form.quantity),
+      mrp: Number(form.mrp),
+      price: Number(form.price),
+      exchange: form.exchange === "yes",
+      isPublished: Boolean(form.isPublished),
+    };
 
     try {
       if (isEdit) {
         await dispatch(
-          updateProduct({ id: editProduct._id, data: form })
+          updateProduct({ id: editProduct._id, data: payload })
         ).unwrap();
       } else {
-        await dispatch(addProduct(form)).unwrap();
+        await dispatch(addProduct(payload)).unwrap();
       }
 
-      onClose(); 
+      onClose();
     } catch (err) {
       console.error("Product save failed", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -85,7 +88,7 @@ const AddProductModal = ({ onClose, editProduct = null }) => {
           <h2 className="text-sm font-semibold">
             {isEdit ? "Edit Product" : "Add Product"}
           </h2>
-          <button onClick={onClose}>
+          <button onClick={onClose} disabled={loading}>
             <X size={18} className="text-gray-400" />
           </button>
         </div>
@@ -109,7 +112,7 @@ const AddProductModal = ({ onClose, editProduct = null }) => {
             select
           />
           <Input
-            label="Quantity Stock"
+            label="Quantity"
             name="quantity"
             type="number"
             value={form.quantity}
@@ -130,11 +133,39 @@ const AddProductModal = ({ onClose, editProduct = null }) => {
             onChange={handleChange}
           />
           <Input
-            label="Brand Name"
+            label="Brand"
             name="brand"
             value={form.brand}
             onChange={handleChange}
           />
+
+          {/* EXCHANGE */}
+          <div>
+            <label className="text-xs font-medium block mb-1">
+              Exchange Available
+            </label>
+            <select
+              name="exchange"
+              value={form.exchange}
+              onChange={handleChange}
+              className="input"
+            >
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+
+          {/* PUBLISH */}
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={form.isPublished}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, isPublished: e.target.checked }))
+              }
+            />
+            Publish Product
+          </label>
 
           {/* EXISTING IMAGES */}
           {form.existingImages.length > 0 && (
@@ -144,7 +175,7 @@ const AddProductModal = ({ onClose, editProduct = null }) => {
                 {form.existingImages.map((img, idx) => (
                   <div key={idx} className="relative">
                     <img
-                      src={img.url}
+                      src={img.url || img}
                       className="w-16 h-16 rounded-md border object-cover"
                     />
                     <button
@@ -162,26 +193,31 @@ const AddProductModal = ({ onClose, editProduct = null }) => {
 
           {/* NEW IMAGES */}
           <div>
-            <p className="text-xs font-medium mb-1">Add New Images</p>
-            <div className="flex gap-2 flex-wrap">
-              {form.images.map((img, idx) => (
-                <div key={idx} className="relative">
-                  <img
-                    src={URL.createObjectURL(img)}
-                    className="w-16 h-16 rounded-md border object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeNewImage(idx)}
-                    className="absolute -top-2 -right-2 bg-white border rounded-full w-5 h-5 text-xs"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
+            <p className="text-xs font-medium mb-1">Add Images</p>
 
-            <label className="text-xs text-blue-600 cursor-pointer mt-2 inline-block">
+            {/* PREVIEW SELECTED IMAGES */}
+            {form.images.length > 0 && (
+              <div className="flex gap-2 flex-wrap mb-2">
+                {form.images.map((img, idx) => (
+                  <div key={idx} className="relative">
+                    <img
+                      src={URL.createObjectURL(img)}
+                      alt="preview"
+                      className="w-16 h-16 rounded-md border object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeNewImage(idx)}
+                      className="absolute -top-2 -right-2 bg-white border rounded-full w-5 h-5 text-xs"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <label className="text-xs text-blue-600 cursor-pointer inline-block">
               Add images
               <input
                 type="file"
@@ -197,8 +233,12 @@ const AddProductModal = ({ onClose, editProduct = null }) => {
           <div className="flex justify-end pt-4">
             <button
               type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded-md text-sm"
+              disabled={loading}
+              className={`flex items-center justify-center gap-2 px-6 py-2 rounded-md text-sm text-white
+                ${loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600"}
+              `}
             >
+              {loading && <Loader2 size={16} className="animate-spin" />}
               {isEdit ? "Update" : "Create"}
             </button>
           </div>
@@ -221,7 +261,7 @@ const Input = ({ label, select, ...props }) => (
         <option>Others</option>
       </select>
     ) : (
-      <input {...props} className="input" required />
+      <input {...props} className="input" />
     )}
   </div>
 );

@@ -4,8 +4,13 @@ import {
   togglePublishProduct,
   deleteProduct,
 } from "../../redux/slices/productSlice";
-import { Trash2 } from "lucide-react";
 import AddProductModal from "./AddProductModal";
+import { Trash2, Loader2 } from "lucide-react";
+
+/* 🔥 NORMALIZER */
+const getIsPublished = (value) => {
+  return value === true || value === "true" || value === 1;
+};
 
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
@@ -13,6 +18,14 @@ const ProductCard = ({ product }) => {
   const [editOpen, setEditOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
+
+  const isPublished = getIsPublished(product.isPublished);
+  const images = product.images || [];
+
+  const handleTogglePublish = async () => {
+    await dispatch(togglePublishProduct(product._id));
+  };
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -25,23 +38,47 @@ const ProductCard = ({ product }) => {
     <>
       {/* CARD */}
       <div className="bg-white rounded-xl border border-gray-300 shadow-sm hover:shadow-md transition p-4">
-        {/* IMAGE */}
-        <div className="bg-gray-50 rounded-lg p-4 flex justify-center items-center h-44">
+        {/* IMAGE SLIDER */}
+        <div className="relative bg-gray-50 rounded-lg p-4 flex justify-center items-center h-44 overflow-hidden">
           <img
-            src={product.images?.[0]?.url}
+            src={images[activeImage]?.url}
             alt={product.name}
             className="h-full object-contain"
           />
+
+          {/* LEFT */}
+          {images.length > 1 && (
+            <button
+              onClick={() =>
+                setActiveImage((p) => (p === 0 ? images.length - 1 : p - 1))
+              }
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 w-6 h-6 rounded-full shadow text-sm"
+            >
+              ‹
+            </button>
+          )}
+
+          {/* RIGHT */}
+          {images.length > 1 && (
+            <button
+              onClick={() =>
+                setActiveImage((p) => (p === images.length - 1 ? 0 : p + 1))
+              }
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 w-6 h-6 rounded-full shadow text-sm"
+            >
+              ›
+            </button>
+          )}
         </div>
 
-        {/* IMAGE DOTS */}
-        {product.images?.length > 1 && (
+        {/* DOTS */}
+        {images.length > 1 && (
           <div className="flex justify-center gap-1 mt-2">
-            {product.images.map((_, i) => (
+            {images.map((_, i) => (
               <span
                 key={i}
                 className={`w-2 h-2 rounded-full ${
-                  i === 0 ? "bg-orange-500" : "bg-gray-300"
+                  i === activeImage ? "bg-orange-500" : "bg-gray-300"
                 }`}
               />
             ))}
@@ -66,19 +103,17 @@ const ProductCard = ({ product }) => {
 
         {/* ACTIONS */}
         <div className="flex gap-2 mt-4">
-          {/* PUBLISH */}
           <button
-            onClick={() => dispatch(togglePublishProduct(product._id))}
+            onClick={handleTogglePublish}
             className={`flex-1 py-2 text-xs font-medium rounded-md text-white ${
-              product.isPublished
+              isPublished
                 ? "bg-green-500 hover:bg-green-600"
                 : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
-            {product.isPublished ? "Unpublish" : "Publish"}
+            {isPublished ? "Unpublish" : "Publish"}
           </button>
 
-          {/* EDIT */}
           <button
             onClick={() => setEditOpen(true)}
             className="flex-1 py-2 text-xs rounded-md border hover:bg-gray-50"
@@ -86,7 +121,6 @@ const ProductCard = ({ product }) => {
             Edit
           </button>
 
-          {/* DELETE */}
           <button
             onClick={() => setConfirmDelete(true)}
             className="w-10 flex items-center justify-center border rounded-md text-gray-400 hover:text-red-500"
@@ -104,21 +138,19 @@ const ProductCard = ({ product }) => {
         />
       )}
 
-      {/* DELETE CONFIRM DIALOG */}
+      {/* DELETE CONFIRM */}
       {confirmDelete && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
           <div className="bg-white w-[340px] rounded-xl p-6">
             <h3 className="text-sm font-semibold">Delete Product</h3>
 
             <p className="text-xs text-gray-500 mt-2">
-              Are you sure you want to delete this product? This action cannot
-              be undone.
+              Are you sure you want to delete this product?
             </p>
 
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setConfirmDelete(false)}
-                disabled={deleting}
                 className="px-4 py-2 text-sm border rounded-md"
               >
                 Cancel
@@ -127,11 +159,11 @@ const ProductCard = ({ product }) => {
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="px-4 py-2 text-sm rounded-md bg-red-600 text-white flex items-center gap-2"
+                className={`flex items-center gap-2 px-4 py-2 text-sm rounded-md text-white
+    ${deleting ? "bg-red-400 cursor-not-allowed" : "bg-red-600"}
+  `}
               >
-                {deleting && (
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                )}
+                {deleting && <Loader2 size={14} className="animate-spin" />}
                 Delete
               </button>
             </div>
@@ -142,7 +174,7 @@ const ProductCard = ({ product }) => {
   );
 };
 
-/* SMALL ROW COMPONENT */
+/* ROW */
 const Row = ({ label, value }) => (
   <div className="flex justify-between">
     <span>{label} -</span>

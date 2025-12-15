@@ -16,11 +16,12 @@ const Home = () => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
+  const isPublished = (value) => value === true || value === "true";
+
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const isPublished = product.isPublished === true;
-
-      return activeTab === "published" ? isPublished : !isPublished;
+      const published = isPublished(product.isPublished);
+      return activeTab === "published" ? published : !published;
     });
   }, [products, activeTab]);
 
@@ -28,6 +29,7 @@ const Home = () => {
     <div className="px-10 py-6">
       {/* TABS */}
       <div className="border-b mb-8 flex gap-8">
+        {/* PUBLISHED */}
         <button
           onClick={() => setActiveTab("published")}
           className={`pb-3 text-sm font-medium ${
@@ -39,6 +41,7 @@ const Home = () => {
           Unpublished
         </button>
 
+        {/* UNPUBLISHED */}
         <button
           onClick={() => setActiveTab("unpublished")}
           className={`pb-3 text-sm font-medium ${
@@ -57,7 +60,7 @@ const Home = () => {
       ) : filteredProducts.length === 0 ? (
         <EmptyState
           title={`No ${
-            activeTab === "published" ? "Published" : "Unpublished"
+            activeTab === "published" ? "Unpublished" : "Published"
           } Products`}
           subtitle="Create your first product to see it here."
         />
