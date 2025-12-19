@@ -1,21 +1,25 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
+  host: process.env.MAILTRAP_HOST,
+  port: Number(process.env.MAILTRAP_PORT),
   secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.MAILTRAP_USER,
+    pass: process.env.MAILTRAP_PASS,
   },
 });
 
-const sendEmail = async (to, subject, text) => {
+const sendEmail = async (to, subject, otp) => {
   await transporter.sendMail({
-    from: `"Productr" <${process.env.EMAIL_USER}>`,
+    from: process.env.FROM_EMAIL,
     to,
     subject,
-    text,
+    html: `
+      <h2>OTP Verification</h2>
+      <h1>${otp}</h1>
+      <p>Valid for 5 minutes</p>
+    `,
   });
 };
 
