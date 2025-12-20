@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../utils/axios";
 
-const API = "http://16.171.42.208:5000/api/auth";
+const API = "/auth";
 
 /*  SEND LOGIN OTP  */
 export const sendLoginOtp = createAsyncThunk(

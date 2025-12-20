@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../utils/axios"
 
-const API = "http://16.171.42.208:5000/api/products";
+const API = "/products";
 
 /*
    FETCH PRODUCTS (USER WISE)
