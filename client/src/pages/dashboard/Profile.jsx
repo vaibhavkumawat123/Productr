@@ -1,7 +1,7 @@
 import { useAuth } from "../../hooks/useAuth";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "../../utils/axios";
 
 const Profile = () => {
   const { user, login } = useAuth();
@@ -18,15 +18,11 @@ const Profile = () => {
       formData.append("userName", name);
       if (avatar) formData.append("avatar", avatar);
 
-      const res = await axios.put(
-        "http://16.171.42.208:5000/api/auth/update-profile",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const res = await axios.put("/auth/update-profile", formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
       login({
         token: localStorage.getItem("token"),
@@ -60,7 +56,9 @@ const Profile = () => {
               avatar
                 ? URL.createObjectURL(avatar)
                 : user?.avatar
-                ? `http://localhost:5000${user.avatar}`
+                ? `${import.meta.env.VITE_API_URL.replace("/api", "")}${
+                    user.avatar
+                  }`
                 : "/default-avatar.png"
             }
             className="w-24 h-24 rounded-full object-cover border"
