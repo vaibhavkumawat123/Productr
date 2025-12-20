@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API = "https://productr-3pqm.onrender.com/api/products";
+const API = "http://16.171.42.208:5000/api/products";
 
 /*
    FETCH PRODUCTS (USER WISE)
