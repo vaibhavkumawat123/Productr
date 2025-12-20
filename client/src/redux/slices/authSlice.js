@@ -1,9 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/axios";
 
-const API = "/api/auth";
+/* ================= LOGIN OTP ================= */
 
-/*  SEND LOGIN OTP  */
 export const sendLoginOtp = createAsyncThunk(
   "auth/sendLoginOtp",
   async ({ email }, { rejectWithValue }) => {
@@ -16,7 +15,6 @@ export const sendLoginOtp = createAsyncThunk(
   }
 );
 
-/*  VERIFY LOGIN OTP  */
 export const verifyLoginOtp = createAsyncThunk(
   "auth/verifyLoginOtp",
   async ({ email, otp }, { rejectWithValue }) => {
@@ -31,23 +29,15 @@ export const verifyLoginOtp = createAsyncThunk(
   }
 );
 
-/*  SEND SIGNUP OTP  */
+/* ================= SIGNUP OTP ================= */
+
 export const sendSignupOtp = createAsyncThunk(
   "auth/sendSignupOtp",
   async ({ email }, { rejectWithValue }) => {
     try {
-      const res = await api.post(
-        `${API}/signup/send-otp`,
-        { email },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await api.post("/auth/signup/send-otp", { email });
       return res.data;
     } catch (err) {
-      console.log("BACKEND ERROR 👉", err.response?.data);
       return rejectWithValue(
         err.response?.data?.message || "Signup OTP failed"
       );
@@ -55,12 +45,11 @@ export const sendSignupOtp = createAsyncThunk(
   }
 );
 
-/*  VERIFY SIGNUP OTP  */
 export const verifySignupOtp = createAsyncThunk(
   "auth/verifySignupOtp",
   async ({ userName, email, password, otp }, { rejectWithValue }) => {
     try {
-      const res = await api.post(`${API}/signup/verify-otp`, {
+      const res = await api.post("/auth/signup/verify-otp", {
         userName,
         email,
         password,
@@ -75,7 +64,7 @@ export const verifySignupOtp = createAsyncThunk(
   }
 );
 
-/*  SLICE  */
+/* ================= SLICE ================= */
 
 const authSlice = createSlice({
   name: "auth",
@@ -83,96 +72,75 @@ const authSlice = createSlice({
     loading: false,
     verifying: false,
     error: null,
-
-    // 🔥 IMPORTANT
-    token: localStorage.getItem("token") || null,
-    user: JSON.parse(localStorage.getItem("user")) || null,
+    token: localStorage.getItem("token"),
+    user: JSON.parse(localStorage.getItem("user")),
     isAuthenticated: !!localStorage.getItem("token"),
   },
-
   reducers: {
     clearError: (state) => {
       state.error = null;
     },
-
     logout: (state) => {
       state.token = null;
       state.user = null;
       state.isAuthenticated = false;
-
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      localStorage.clear();
     },
   },
-
   extraReducers: (builder) => {
     builder
-
-      /* ---------- SEND OTP ---------- */
-      .addCase(sendLoginOtp.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+      .addCase(sendLoginOtp.pending, (s) => {
+        s.loading = true;
       })
-      .addCase(sendLoginOtp.fulfilled, (state) => {
-        state.loading = false;
+      .addCase(sendLoginOtp.fulfilled, (s) => {
+        s.loading = false;
       })
-      .addCase(sendLoginOtp.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+      .addCase(sendLoginOtp.rejected, (s, a) => {
+        s.loading = false;
+        s.error = a.payload;
       })
 
-      .addCase(sendSignupOtp.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+      .addCase(sendSignupOtp.pending, (s) => {
+        s.loading = true;
       })
-      .addCase(sendSignupOtp.fulfilled, (state) => {
-        state.loading = false;
+      .addCase(sendSignupOtp.fulfilled, (s) => {
+        s.loading = false;
       })
-      .addCase(sendSignupOtp.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      /* ---------- VERIFY LOGIN OTP ---------- */
-      .addCase(verifyLoginOtp.pending, (state) => {
-        state.verifying = true;
-        state.error = null;
-      })
-      .addCase(verifyLoginOtp.fulfilled, (state, action) => {
-        state.verifying = false;
-
-        // 🔥 STORE TOKEN + USER
-        state.token = action.payload.token;
-        state.user = action.payload.user;
-        state.isAuthenticated = true;
-
-        localStorage.setItem("token", action.payload.token);
-        localStorage.setItem("user", JSON.stringify(action.payload.user));
-      })
-      .addCase(verifyLoginOtp.rejected, (state, action) => {
-        state.verifying = false;
-        state.error = action.payload;
+      .addCase(sendSignupOtp.rejected, (s, a) => {
+        s.loading = false;
+        s.error = a.payload;
       })
 
-      /* ---------- VERIFY SIGNUP OTP ---------- */
-      .addCase(verifySignupOtp.pending, (state) => {
-        state.verifying = true;
-        state.error = null;
+      .addCase(verifyLoginOtp.pending, (s) => {
+        s.verifying = true;
       })
-      .addCase(verifySignupOtp.fulfilled, (state, action) => {
-        state.verifying = false;
-
-        // 🔥 STORE TOKEN + USER
-        state.token = action.payload.token;
-        state.user = action.payload.user;
-        state.isAuthenticated = true;
-
-        localStorage.setItem("token", action.payload.token);
-        localStorage.setItem("user", JSON.stringify(action.payload.user));
+      .addCase(verifyLoginOtp.fulfilled, (s, a) => {
+        s.verifying = false;
+        s.token = a.payload.token;
+        s.user = a.payload.user;
+        s.isAuthenticated = true;
+        localStorage.setItem("token", a.payload.token);
+        localStorage.setItem("user", JSON.stringify(a.payload.user));
       })
-      .addCase(verifySignupOtp.rejected, (state, action) => {
-        state.verifying = false;
-        state.error = action.payload;
+      .addCase(verifyLoginOtp.rejected, (s, a) => {
+        s.verifying = false;
+        s.error = a.payload;
+      })
+
+      .addCase(verifySignupOtp.pending, (s) => {
+        s.verifying = true;
+      })
+      .addCase(verifySignupOtp.fulfilled, (s, a) => {
+        s.verifying = false;
+        s.token = a.payload.token;
+        s.user = a.payload.user;
+        s.isAuthenticated = true;
+        localStorage.setItem("token", a.payload.token);
+        localStorage.setItem("user", JSON.stringify(a.payload.user));
+      })
+      .addCase(verifySignupOtp.rejected, (s, a) => {
+        s.verifying = false;
+        s.error = a.payload;
       });
   },
 });

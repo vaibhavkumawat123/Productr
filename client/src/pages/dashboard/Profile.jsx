@@ -19,7 +19,7 @@ const Profile = () => {
       if (avatar) formData.append("avatar", avatar);
 
       const res = await api.put(
-        "/api/auth/update-profile",
+        "/auth/update-profile",
         formData,
         {
           headers: {

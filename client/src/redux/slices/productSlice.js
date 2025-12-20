@@ -1,39 +1,26 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/axios";
 
-const API = "/api/products";
+const API = "/products";
 
-/*
-   FETCH PRODUCTS (USER WISE)
-   */
+/* FETCH PRODUCTS */
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const token = getState().auth.token;
-      if (!token) throw new Error("No auth token found");
-
-      const res = await api.get(API, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const res = await api.get(API);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message);
+      return rejectWithValue(err.response?.data?.message);
     }
   }
 );
 
-/*
-   ADD PRODUCT
-   */
+/* ADD PRODUCT */
 export const addProduct = createAsyncThunk(
   "products/addProduct",
-  async (data, { getState, rejectWithValue }) => {
+  async (data, { rejectWithValue }) => {
     try {
-      const token = getState().auth.token;
-      if (!token) throw new Error("No auth token found");
-
       const formData = new FormData();
       Object.keys(data).forEach((key) => {
         if (key === "images") {
@@ -43,71 +30,45 @@ export const addProduct = createAsyncThunk(
         }
       });
 
-      const res = await api.post(API, formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const res = await api.post(API, formData);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message);
+      return rejectWithValue(err.response?.data?.message);
     }
   }
 );
 
-/*
-   TOGGLE PUBLISH / UNPUBLISH
-   */
+/* TOGGLE PUBLISH */
 export const togglePublishProduct = createAsyncThunk(
   "products/togglePublish",
-  async (id, { getState, rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
-      const token = getState().auth.token;
-      if (!token) throw new Error("No auth token found");
-
-      const res = await api.patch(
-        `${API}/${id}/publish`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      return res.data; 
+      const res = await api.patch(`${API}/${id}/publish`);
+      return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message);
+      return rejectWithValue(err.response?.data?.message);
     }
   }
 );
 
-/*
-   DELETE PRODUCT
-   */
+/* DELETE PRODUCT */
 export const deleteProduct = createAsyncThunk(
   "products/deleteProduct",
-  async (id, { getState, rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
-      const token = getState().auth.token;
-      if (!token) throw new Error("No auth token found");
-
-      await api.delete(`${API}/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      await api.delete(`${API}/${id}`);
       return id;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message);
+      return rejectWithValue(err.response?.data?.message);
     }
   }
 );
 
-/*
-   UPDATE / EDIT PRODUCT
-   */
+/* UPDATE PRODUCT */
 export const updateProduct = createAsyncThunk(
   "products/updateProduct",
-  async ({ id, data }, { getState, rejectWithValue }) => {
+  async ({ id, data }, { rejectWithValue }) => {
     try {
-      const token = getState().auth.token;
-      if (!token) throw new Error("No auth token found");
-
       const formData = new FormData();
       Object.keys(data).forEach((key) => {
         if (key === "images") {
@@ -117,20 +78,15 @@ export const updateProduct = createAsyncThunk(
         }
       });
 
-      const res = await api.put(`${API}/${id}`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const res = await api.put(`${API}/${id}`, formData);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message);
+      return rejectWithValue(err.response?.data?.message);
     }
   }
 );
 
-/*
-   SLICE
-   */
+/* SLICE */
 const productSlice = createSlice({
   name: "products",
   initialState: {
@@ -141,52 +97,30 @@ const productSlice = createSlice({
   reducers: {
     clearProducts: (state) => {
       state.items = [];
-      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      /* FETCH */
-      .addCase(fetchProducts.pending, (state) => {
-        state.loading = true;
+      .addCase(fetchProducts.pending, (s) => {
+        s.loading = true;
       })
-      .addCase(fetchProducts.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = action.payload;
+      .addCase(fetchProducts.fulfilled, (s, a) => {
+        s.loading = false;
+        s.items = a.payload;
       })
-      .addCase(fetchProducts.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+      .addCase(fetchProducts.rejected, (s, a) => {
+        s.loading = false;
+        s.error = a.payload;
       })
-
-      /* ADD */
-      .addCase(addProduct.fulfilled, (state, action) => {
-        state.items.unshift(action.payload);
+      .addCase(addProduct.fulfilled, (s, a) => {
+        s.items.unshift(a.payload);
       })
-
-      /* TOGGLE PUBLISH */
-      .addCase(togglePublishProduct.fulfilled, (state, action) => {
-        const index = state.items.findIndex(
-          (p) => p._id === action.payload._id
-        );
-        if (index !== -1) {
-          state.items[index] = action.payload;
-        }
+      .addCase(deleteProduct.fulfilled, (s, a) => {
+        s.items = s.items.filter((p) => p._id !== a.payload);
       })
-
-      /* DELETE */
-      .addCase(deleteProduct.fulfilled, (state, action) => {
-        state.items = state.items.filter((p) => p._id !== action.payload);
-      })
-
-      /* UPDATE */
-      .addCase(updateProduct.fulfilled, (state, action) => {
-        const index = state.items.findIndex(
-          (p) => p._id === action.payload._id
-        );
-        if (index !== -1) {
-          state.items[index] = action.payload;
-        }
+      .addCase(updateProduct.fulfilled, (s, a) => {
+        const i = s.items.findIndex((p) => p._id === a.payload._id);
+        if (i !== -1) s.items[i] = a.payload;
       });
   },
 });
