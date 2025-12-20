@@ -1,14 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/axios";
 
-const API = "/api/products";
+const API = "/api/auth";
 
 /*  SEND LOGIN OTP  */
 export const sendLoginOtp = createAsyncThunk(
   "auth/sendLoginOtp",
   async ({ email }, { rejectWithValue }) => {
     try {
-      const res = await api.post(`${API}/login/send-otp`, { email });
+      const res = await api.post("/auth/login/send-otp", { email });
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message);
@@ -21,7 +21,7 @@ export const verifyLoginOtp = createAsyncThunk(
   "auth/verifyLoginOtp",
   async ({ email, otp }, { rejectWithValue }) => {
     try {
-      const res = await api.post(`${API}/login/verify-otp`, { email, otp });
+      const res = await api.post("/auth/login/verify-otp", { email, otp });
       return res.data;
     } catch (err) {
       return rejectWithValue(
@@ -37,7 +37,7 @@ export const sendSignupOtp = createAsyncThunk(
   async ({ email }, { rejectWithValue }) => {
     try {
       const res = await api.post(
-        "https://productr-3pqm.onrender.com/api/auth/signup/send-otp",
+        `${API}/signup/send-otp`,
         { email },
         {
           headers: {

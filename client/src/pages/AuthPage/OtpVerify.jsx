@@ -44,7 +44,12 @@ const OtpVerify = ({ email, mode, signupData }) => {
     let res;
 
     if (mode === "login") {
-      res = await dispatch(verifyLoginOtp({ email, otp: finalOtp }));
+      res = await dispatch(
+        verifyLoginOtp({
+          email,
+          otp,
+        })
+      );
     } else {
       res = await dispatch(verifySignupOtp({ ...signupData, otp: finalOtp }));
     }
