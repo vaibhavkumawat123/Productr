@@ -18,11 +18,15 @@ const Profile = () => {
       formData.append("userName", name);
       if (avatar) formData.append("avatar", avatar);
 
-      const res = await axios.put("/auth/update-profile", formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const res = await api.put(
+        "/api/auth/update-profile",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       login({
         token: localStorage.getItem("token"),
@@ -56,9 +60,7 @@ const Profile = () => {
               avatar
                 ? URL.createObjectURL(avatar)
                 : user?.avatar
-                ? `${import.meta.env.VITE_API_URL.replace("/api", "")}${
-                    user.avatar
-                  }`
+                ? `${import.meta.env.VITE_API_BASE_URL}${user.avatar}`
                 : "/default-avatar.png"
             }
             className="w-24 h-24 rounded-full object-cover border"

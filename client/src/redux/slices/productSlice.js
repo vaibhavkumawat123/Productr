@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../../utils/axios"
+import api from "../../utils/axios";
 
-const API = "/products";
+const API = "/api/products";
 
 /*
    FETCH PRODUCTS (USER WISE)
@@ -13,7 +13,7 @@ export const fetchProducts = createAsyncThunk(
       const token = getState().auth.token;
       if (!token) throw new Error("No auth token found");
 
-      const res = await axios.get(API, {
+      const res = await api.get(API, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -43,7 +43,7 @@ export const addProduct = createAsyncThunk(
         }
       });
 
-      const res = await axios.post(API, formData, {
+      const res = await api.post(API, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -64,7 +64,7 @@ export const togglePublishProduct = createAsyncThunk(
       const token = getState().auth.token;
       if (!token) throw new Error("No auth token found");
 
-      const res = await axios.patch(
+      const res = await api.patch(
         `${API}/${id}/publish`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
@@ -87,7 +87,7 @@ export const deleteProduct = createAsyncThunk(
       const token = getState().auth.token;
       if (!token) throw new Error("No auth token found");
 
-      await axios.delete(`${API}/${id}`, {
+      await api.delete(`${API}/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -117,7 +117,7 @@ export const updateProduct = createAsyncThunk(
         }
       });
 
-      const res = await axios.put(`${API}/${id}`, formData, {
+      const res = await api.put(`${API}/${id}`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
