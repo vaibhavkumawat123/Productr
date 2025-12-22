@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-dotenv.config({ path: "./.env" });
+dotenv.config(); 
 
 import express from "express";
 import mongoose from "mongoose";
@@ -7,6 +7,11 @@ import cors from "cors";
 
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+
+console.log(
+  "🔑 RESEND_API_KEY =",
+  process.env.RESEND_API_KEY ? "LOADED ✅" : "MISSING ❌"
+);
 
 const app = express();
 
@@ -28,10 +33,9 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 
-/* 🔥 GLOBAL ERROR HANDLER  */
+/* GLOBAL ERROR HANDLER */
 app.use((err, req, res, next) => {
   console.error("🔥 GLOBAL ERROR:", err);
-
   res.status(err.statusCode || 500).json({
     success: false,
     message: err.message || "Server Error",
