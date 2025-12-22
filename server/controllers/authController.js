@@ -144,7 +144,10 @@ export const verifyLoginOtp = async (req, res, next) => {
       throw new CustomError(400, "Email and OTP required");
     }
 
-    const otpData = await Otp.findOne({ email }).sort({ createdAt: -1 });
+    const otpData = await Otp.findOne({
+      email,
+      otp: String(otp),
+    });
     if (!otpData) throw new CustomError(400, "OTP not found");
 
     if (Date.now() > otpData.expiresAt.getTime()) {
@@ -152,7 +155,7 @@ export const verifyLoginOtp = async (req, res, next) => {
       throw new CustomError(400, "OTP expired");
     }
 
-    if (otpData.otp !== otp.toString()) {
+    if (String(otpData.otp) !== String(otp)) {
       throw new CustomError(400, "Invalid OTP");
     }
 
@@ -178,7 +181,6 @@ export const verifyLoginOtp = async (req, res, next) => {
     next(err);
   }
 };
-
 export const updateProfile = async (req, res) => {
   const { userName } = req.body;
 
