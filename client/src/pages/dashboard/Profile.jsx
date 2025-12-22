@@ -60,7 +60,7 @@ const Profile = () => {
               avatar
                 ? URL.createObjectURL(avatar)
                 : user?.avatar
-                ? `${import.meta.env.VITE_API_BASE_URL}${user.avatar}`
+                ? `${import.meta.env.VITE_API_URL}${user.avatar}`
                 : "/default-avatar.png"
             }
             className="w-24 h-24 rounded-full object-cover border"

@@ -14,6 +14,7 @@ const OtpVerify = ({ email, mode, signupData }) => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { loading, error } = useSelector((s) => s.auth);
+  const finalOtp = otp.join("");
 
   const handleChange = (value, index) => {
     if (!/^\d?$/.test(value)) return;
@@ -44,12 +45,7 @@ const OtpVerify = ({ email, mode, signupData }) => {
     let res;
 
     if (mode === "login") {
-      res = await dispatch(
-        verifyLoginOtp({
-          email,
-          otp,
-        })
-      );
+      res = await dispatch(verifyLoginOtp({ email, otp: finalOtp }));
     } else {
       res = await dispatch(verifySignupOtp({ ...signupData, otp: finalOtp }));
     }

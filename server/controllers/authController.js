@@ -32,11 +32,11 @@ export const sendSignupOTP = async (req, res, next) => {
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     });
 
-    await sendEmail(
-      email,
-      "Productr Signup OTP",
-      `Your signup OTP is ${otp}. It will expire in 5 minutes.`
-    );
+    await sendEmail({
+      to: email,
+      subject: "Productr Signup OTP",
+      html: `Your signup OTP is <b>${otp}</b>. It will expire in 5 minutes.`,
+    });
 
     console.log("✅ SIGNUP OTP SENT:", otp);
 
@@ -49,7 +49,6 @@ export const sendSignupOTP = async (req, res, next) => {
     next(error);
   }
 };
-
 
 /*  VERIFY OTP & SIGNUP  */
 export const verifySignupOTP = async (req, res, next) => {
@@ -121,11 +120,11 @@ export const sendLoginOTP = async (req, res, next) => {
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     });
 
-    await sendEmail(
-      email,
-      "Productr Login OTP",
-      `Your login OTP is ${otp}. It will expire in 5 minutes.`
-    );
+    await sendEmail({
+      to: email,
+      subject: "Productr Login OTP",
+      html: `Your login OTP is <b>${otp}</b>. It will expire in 5 minutes.`,
+    });
 
     res.status(200).json({
       success: true,
@@ -145,30 +144,29 @@ export const verifyLoginOtp = async (req, res, next) => {
       throw new CustomError(400, "Email and OTP required");
     }
 
-    const otpData = await Otp.findOne({ email });
+    const otpData = await Otp.findOne({ email }).sort({ createdAt: -1 });
     if (!otpData) throw new CustomError(400, "OTP not found");
 
     if (Date.now() > otpData.expiresAt.getTime()) {
-      await Otp.deleteOne({ email });
+      await Otp.deleteMany({ email });
       throw new CustomError(400, "OTP expired");
     }
 
-    if (otpData.otp !== otp) {
+    if (otpData.otp !== otp.toString()) {
       throw new CustomError(400, "Invalid OTP");
     }
 
     const user = await User.findOne({ email });
     if (!user) throw new CustomError(400, "User not found");
 
-    await Otp.deleteOne({ email });
+    await Otp.deleteMany({ email });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
-      message: "Login successful",
       token,
       user: {
         id: user._id,
@@ -176,8 +174,8 @@ export const verifyLoginOtp = async (req, res, next) => {
         userName: user.userName,
       },
     });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
