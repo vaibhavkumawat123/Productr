@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 /* CORS */
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://productr-rho.vercel.app"],
+    origin: ["http://localhost:5173", "https://productr-five.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

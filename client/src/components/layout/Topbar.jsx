@@ -9,6 +9,8 @@ const Topbar = () => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
   const location = useLocation();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     const handler = (e) => {
@@ -20,11 +22,17 @@ const Topbar = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const handleLogout = () => {
-    setOpen(false);
-    logout();
-    navigate("/auth/login");
+  const confirmLogout = async () => {
+    setLoggingOut(true);
+
+    setTimeout(() => {
+      logout();
+      setLoggingOut(false);
+      setShowLogoutDialog(false);
+      navigate("/auth/login");
+    }, 1200);
   };
+
 
   return (
     <header
@@ -105,7 +113,10 @@ const Topbar = () => {
               </button>
 
               <button
-                onClick={handleLogout}
+                onClick={() => {
+                  setOpen(false);
+                  setShowLogoutDialog(true);
+                }}
                 className="w-full flex items-center gap-3 px-4 py-2 rounded-md hover:bg-red-50 text-red-600 text-sm"
               >
                 <LogOut size={16} />
@@ -115,6 +126,40 @@ const Topbar = () => {
           </div>
         )}
       </div>
+      {showLogoutDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl w-[360px] p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Logout Confirmation
+            </h3>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Are you sure you want to logout?
+            </p>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowLogoutDialog(false)}
+                disabled={loggingOut}
+                className="px-4 py-2 rounded-md text-sm border hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={confirmLogout}
+                disabled={loggingOut}
+                className="px-4 py-2 rounded-md text-sm text-white bg-red-600 hover:bg-red-700 flex items-center gap-2"
+              >
+                {loggingOut && (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                )}
+                {loggingOut ? "Logging out..." : "Logout"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
